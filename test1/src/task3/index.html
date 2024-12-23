@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Дневник путешествий</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body {
+            background-image: url(/test1/earth.jpg);
+        }
+    
+        h1{
+            color:aqua;
+            text-align: center;
+        }
+        h2{
+            color:aqua;
+            text-align: center;
+        }
+        
+        div{
+           text-align: center;
+        }
+        
+        .buttn{
+	    padding: 0 25px;
+	    outline: none;
+	    border-radius: 70px;
+	    height: 46px;
+	    line-height: 46px;
+	    font-weight: 600;
+	    text-decoration: none;
+	    color: black;
+	    background-color: #fff;
+	    cursor: pointer;
+        }
+
+        input{
+            color: white;
+        }
+
+        label{
+            color: rgb(6, 153, 146);
+            font-size: 30px;
+        }
+        .sumb{
+        padding: 0 25px;
+	    outline: none;
+	    border-radius: 70px;
+	    height: 46px;
+	    line-height: 46px;
+	    font-weight: 600;
+	    text-decoration: none;
+	    color: black;
+	    background-color: rgb(6, 153, 146);
+	    cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>Дневник путешествий</h1>
+
+<div><button id="createUserBtn" class="buttn">Создать пользователя</button></div>
+
+<h2>Добавьте свое путешествие</h2>
+<div><button id="recordJourneyBtn" class="buttn">Добавить</button></div>
+<form id="journeyForm" style="display: none;">
+    <label for="username">Имя:</label>
+    <input type="text" id="username" required><br>
+
+    <label for="location">Локация:</label>
+    <input type="text" id="location" required><br>
+
+    <label for="imageURL">URL-адрес изображения:</label>
+    <input type="text" id="imageURL"><br>
+
+    <label for="cost">Стоимость поездки:</label>
+    <input type="number" id="cost"><br>
+
+    <label for="culturalHeritage">Места культурного наследия:</label>
+    <input type="text" id="culturalHeritage"><br>
+
+    <label for="easeOfTravel">Оцените уровень поездки:</label>
+    <input type="text" id="easeOfTravel"><br>
+
+    <button type="submit" class="sumb">Опубликовать путешествие</button>
+</form>
+
+<h2>Путешествия</h2>
+<div><button id="viewJourneysBtn" class="buttn" onclick="displayJourneys()">Показать</button></div>
+<div id="journeyList"></div>
+
+<script src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>

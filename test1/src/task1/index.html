@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<meta charset="UTF-8">    
+<head>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background-image: url(/test1/fon.jpg);
+        }
+        #login-section, #post-section {
+            max-width: 600px;
+            margin: auto;
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+            margin-top: 100px;
+            text-align: center;
+        }
+
+        input, textarea, button {
+            display: block;
+            width: 95%;
+            margin-top: 10px;
+            padding: 17px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: aliceblue;
+            text-align: center;
+            background-color: #02a187;
+            border-radius: 100px;
+            width: 100%;
+            padding: 20px 0;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #02a187;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            width: 100%;
+            margin-top: 30px;
+            padding: 17px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #post-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #post-list li {
+            padding: 12px;
+            background-color: white;
+            margin: 8px 0;
+            border-radius: 4px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+
+    <title>Приложение для блога</title>
+    <script>
+        let users = [];
+        let posts = [];
+        let currentUser = null;
+
+        function register() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            users.push({username, password});
+            alert("Регистрация успешна, можете войти!");
+        }
+
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            currentUser = users.find(user => user.username === username && user.password === password);
+            if(currentUser) {
+                alert("Вы успешно зашли на сайт!");
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("post-section").style.display = "block";
+            } else {
+                alert("Неверные данные");
+            }
+        }
+
+        function createPost() {
+            const content = document.getElementById("post-content").value;
+            const newPost = { content, author: currentUser.username, comments: [], tags: [] };
+            posts.push(newPost);
+            displayPosts();
+        }
+
+        function displayPosts(sortedPosts = null) {
+            const postList = document.getElementById("post-list");
+            postList.innerHTML = "";
+            const displayPostsArray = sortedPosts || posts;
+            displayPostsArray.forEach((post, index) => {
+                const postItem = document.createElement("li");
+                postItem.innerText = `${post.content} (Автор: ${post.author}) Тэги: ${post.tags ? post.tags.join(',') : 'Никто'}`;
+
+                const editButton = document.createElement("button");
+                editButton.innerText = "Редактировать";
+                editButton.onclick = function() { editPost(index); };
+
+                const deleteButton = document.createElement("button");
+                deleteButton.innerText = "Удалить";
+                deleteButton.onclick = function() { deletePost(index); };
+
+                const addTagsButton = document.createElement("button");
+                addTagsButton.innerText = "Добавить тэги";
+                addTagsButton.onclick = function() { addTags(index); };
+
+                const addCommentButton = document.createElement("button");
+                addCommentButton.innerText = "Добавить комментарий";
+                addCommentButton.onclick = function() { addComment(index); };
+
+                const sortPostsByTagsButton = document.createElement("button");
+                sortPostsByTagsButton.innerText = "Сортировка";
+                sortPostsByTagsButton.onclick = function() { sortPostsByTags(index); };
+
+                postItem.appendChild(editButton);
+                postItem.appendChild(deleteButton);
+                postItem.appendChild(addTagsButton);
+                postItem.appendChild(addCommentButton);
+
+                if (post.comments && post.comments.length > 0) {
+                    const commentList = document.createElement("ul");
+                    post.comments.forEach(comment => {
+                        const commentItem = document.createElement("li");
+                        commentItem.innerText = `${comment.content} (Author: ${comment.author})`;
+                        commentList.appendChild(commentItem);
+                    });
+                    postItem.appendChild(commentList);
+                }
+
+                postList.appendChild(postItem);
+            });
+        }
+
+        function deletePost(index) {
+            posts.splice(index, 1);
+            displayPosts();
+        }
+
+        function addComment(index) {
+            const comment = prompt("Добавьте ваш комментарий:");
+            if (comment) {
+                if (!posts[index].comments) {
+                    posts[index].comments = [];
+                }
+                posts[index].comments.push({ author: currentUser.username, content: comment });
+                displayPosts();
+            }
+        }
+
+        function subscribeToUser() {
+            const usernameToSubscribe = document.getElementById("subscribe-username").value;
+            const user = users.find(user => user.username === usernameToSubscribe);
+            if (user && currentUser) {
+                currentUser.subscriptions.push(user.username);
+                alert("Подписаны!");
+            } else {
+                alert("Пользователь не найден!");
+            }
+        }
+
+        function generateFeed() {
+            const feed = [];
+            currentUser.subscriptions.forEach(userId => {
+                const userPosts = posts.filter(post => post.userId === userId);
+                feed.push(...userPosts);
+            });
+
+            displayPosts(feed);
+        }
+
+        function viewPublicPosts() {
+            const publicPosts = posts.filter(post => !post.isPrivate);
+            displayPosts(publicPosts);
+        }
+
+        function createHiddenPost() {
+            const content = document.getElementById("hidden-post-content").value;
+            const newPost = { content, author: currentUser.username, isHidden: true };
+            posts.push(newPost);
+            displayPosts();
+        }
+
+        function editPost(index) {
+            const newContent = prompt("Введите новый пост:", posts[index].content);
+            if (newContent !== null) {
+                posts[index].content = newContent;
+                displayPosts();
+            }
+        }
+
+        function addTags(index) {
+            const newTags = prompt("Введите тэги через запятую:", posts[index].tags ? posts[index].tags.join(',') : '');
+            if (newTags !== null) {
+                posts[index].tags = newTags.split(',').map(tag => tag.trim());
+                displayPosts();
+            }
+        }
+
+        function sortPostsByTags() {
+            const tagToSortBy = document.getElementById("sort-tag").value;
+            const sortedPosts = posts.filter(post => post.tags && post.tags.includes(tagToSortBy));
+            displayPosts(sortedPosts);
+        }
+    </script>
+</head>
+<body>
+    <h1>Приложение для блога</h1>
+<div id="login-section"> Форма регистрации
+    <input id="username" placeholder="Логин" />
+    <input type="password" id="password" placeholder="Пароль" />
+    <button onclick="register()">Регистрация</button>
+    <button onclick="login()">Войти</button>
+</div>
+
+<div id="subscribe-section" style="display: none;">
+    <input id="subscribe-username" placeholder="Имя пользователя для подписки" />
+    <button onclick="subscribeToUser()">Подписаться</button>
+</div>
+
+<div id="post-section" style="display: none;">
+    <textarea id="post-content" placeholder="Напишите свой пост"></textarea>
+    <button onclick="createPost()">Создать пост</button>
+    <textarea id="hidden-post-content" placeholder="Напишите свой скрытый пост"></textarea>
+    <button onclick="createHiddenPost()">Создать скрытый пост</button>
+</div>
+
+<div id="sort-section" style="display: none;">
+    <input id="sort-tag" placeholder="Введите тэги для сортировки" />
+    <button onclick="sortPostsByTags()">Сортировка</button>
+</div>
+
+<ul id="post-list">
+</ul>
+
+</body>
+</html>

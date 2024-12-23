@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<meta charset="UTF-8"> 
+<head>
+    <title>Книжный магазин</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        #adminPanel, #userPanel {
+            padding: 20px;
+            display: none;
+        }
+        body {
+            background-image: url(/test1/doski.jpg);
+        }
+
+        h1{
+            color: aquamarine;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="container">
+    <h1 class="center-align">Книжный магазин</h1>
+
+    <div class="center-align">
+        <button class="btn waves-effect waves-light" onclick="showPanel('admin')">Администратор</button>
+        <button class="btn waves-effect waves-light" onclick="showPanel('user')">Пользователь</button>
+    </div>
+
+    <div id="adminPanel" class="card-panel">
+        <h2>Панель администратор</h2>
+        <select id="sortOptionAdmin" class="browser-default" onchange="sortBooks()">
+            <option value="category">Категория</option>
+            <option value="author">Автор</option>
+            <option value="year">Год</option>
+        </select>
+        <button class="btn waves-effect waves-light" onclick="addBook()">Добавить книгу</button>
+        <button class="btn waves-effect waves-light" onclick="sendReminder()">Отправить уведомление о сроке аренды</button>
+        <div id="adminBookList"></div>
+    </div>
+
+    <div id="userPanel" class="card-panel">
+        <h2>Панель пользователя</h2>
+        <select id="sortOption" class="browser-default" onchange="sortBooks()">
+            <option value="category">Категория</option>
+            <option value="author">Автор</option>
+            <option value="year">Год</option>
+        </select>
+        <div id="bookList"></div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+
+    const books = [
+        {title: "Гарри Поттер и Философский камень", author: "Джоан Роулинг", category: "Фэнтези", year: 1997, price: 1700, status: "Доступна"},
+        {title: "Рита Хейуорт и спасение из Шоушенка", author: "Стивен Кинг", category: "Криминал", year: 1982, price: 1500, status: "Доступна"},
+        {title: "451 градус по Фаренгейту", author: "Рэй Брэдбери", category: "Антиутопия", year: 1953, price: 1200, status: "Доступна"},
+        {title: "Зелёная миля", author: "Стивен Кинг", category: "Психологическая драма", year: 1996, price: 1250, status: "Доступна"},
+        {title: "Властелин колец", author: "Джон Рональд Руэл Толкин", category: "Фэнтези", year: 1955, price: 1300, status: "Доступна"},
+        {title: "Хроники Нарнии", author: "Клайв Стэйплз Льюис", category: "Фэнтези", year: 1951, price: 1400, status: "Доступна"},
+    ];
+
+
+    const rentals = [];
+
+    function showPanel(panel) {
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('userPanel').style.display = 'none';
+
+        if (panel === 'admin') {
+            document.getElementById('adminPanel').style.display = 'block';
+            displayAdminBooks();
+        } else if (panel === 'user') {
+            document.getElementById('userPanel').style.display = 'block';
+            displayBooks();
+        }
+    }
+
+    function displayBooks() {
+        const bookList = document.getElementById('bookList');
+        bookList.innerHTML = "";
+        books.forEach((book, index) => {
+            bookList.innerHTML += `
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">${book.title}</span>
+                    <p>Author: ${book.author}<br>
+                    Category: ${book.category}<br>
+                    Year: ${book.year}<br>
+                    Price: ${book.price}</p>
+                </div>
+                <div class="card-action">
+                    <button class="btn-small waves-effect waves-light" onclick="buyOrRentBook(${index})">Покупка/Аренда</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    function displayAdminBooks() {
+        const adminBookList = document.getElementById('adminBookList');
+        adminBookList.innerHTML = "";
+        books.forEach((book, index) => {
+            adminBookList.innerHTML += `
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">${book.title}</span>
+                    <p>Author: ${book.author}<br>
+                    Category: ${book.category}<br>
+                    Year: ${book.year}<br>
+                    Price: ${book.price}<br>
+                    Status: ${book.status}</p>
+                </div>
+                <div class="card-action">
+                    <button class="btn-small waves-effect waves-light" onclick="updateBook(${index})">Изменить</button>
+                    <button class="btn-small waves-effect waves-light" onclick="changeStatus(${index})">Поменять статус книги</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    function updateBook(index) {
+        const bookToUpdate = books[index];
+        bookToUpdate.title = prompt("Название:", bookToUpdate.title);
+        bookToUpdate.author = prompt("Автор:", bookToUpdate.author);
+        bookToUpdate.category = prompt("Категория:", bookToUpdate.category);
+        bookToUpdate.year = parseInt(prompt("Год:", bookToUpdate.year), 10);
+        bookToUpdate.price = parseFloat(prompt("Цена:", bookToUpdate.price));
+        displayAdminBooks();
+    }
+
+    function changeStatus(index) {
+        const bookToUpdate = books[index];
+        bookToUpdate.status = prompt("Статус:", bookToUpdate.status);
+        displayAdminBooks();
+    }
+
+    function sendReminder() {
+        const now = new Date();
+        rentals.forEach((rental) => {
+            if (rental.expiryDate < now) {
+                alert(`Срок аренды истек на ${rental.book.title}. Уведомление пользователя: ${rental.userId}`);
+            }
+        });
+    }
+
+    function buyOrRentBook(index) {
+        const period = prompt("На сколько хотите арендовать? (2 недели / 1 месяц / 3 месяца)");
+        alert(`Вы арендовали ${books[index].title} на ${period}.`);
+    }
+
+    function addBook() {
+        const title = prompt("Название книги:");
+        const author = prompt("ФИО Автора:");
+        const category = prompt("Категория:");
+        const year = prompt("Год выпуска:");
+        const price = prompt("Цена:");
+        books.push({title, author, category, year: parseInt(year, 10), price: parseFloat(price)});
+    }
+
+    function sortBooks() {
+        let sortOption;
+
+        if (document.getElementById('userPanel').style.display === 'block') {
+            sortOption = document.getElementById('sortOption').value;
+            books.sort((a, b) => {
+                if (a[sortOption] < b[sortOption]) return -1;
+                if (a[sortOption] > b[sortOption]) return 1;
+                return 0;
+            });
+            displayBooks();
+        } else if (document.getElementById('adminPanel').style.display === 'block') {
+            sortOption = document.getElementById('sortOptionAdmin').value;
+            books.sort((a, b) => {
+                if (a[sortOption] < b[sortOption]) return -1;
+                if (a[sortOption] > b[sortOption]) return 1;
+                return 0;
+            });
+            displayAdminBooks();
+        }
+    }
+
+</script>
+</body>
+</html>
